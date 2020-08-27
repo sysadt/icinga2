@@ -55,6 +55,7 @@ public:
 	DECLARE_OBJECTNAME(Checkable);
 
 	static void StaticInitialize();
+	static Ptr GetByNamePair(const String& hostName, const String& serviceName);
 
 	Checkable();
 

@@ -1019,8 +1019,10 @@ String Utility::EscapeShellCmd(const String& s)
 		if (ch == '#' || ch == '&' || ch == ';' || ch == '`' || ch == '|' ||
 			ch == '*' || ch == '?' || ch == '~' || ch == '<' || ch == '>' ||
 			ch == '^' || ch == '(' || ch == ')' || ch == '[' || ch == ']' ||
-			ch == '{' || ch == '}' || ch == '$' || ch == '\\' || ch == '\x0A' ||
-			ch == '\xFF')
+			ch == '{' || ch == '}' || ch == '$' || ch == '\\' || ch == '\"' ||
+			ch == '\'' || ch == '\x0A' || ch == '\xFF' || ch == '\x07' ||
+			ch == '\x08' || ch == '\x09' || ch == '\x0B' || ch == '\x0C' ||
+			ch == '\x0D' || ch == '\x1B')
 			escape = true;
 
 		if (escape)

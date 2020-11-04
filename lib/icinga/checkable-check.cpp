@@ -242,6 +242,16 @@ void Checkable::ProcessCheckResult(const CheckResult::Ptr& cr, const MessageOrig
 			OnReachabilityChanged(this, cr, children, origin);
 	}
 
+	if (recovery) {
+		// W/o this children could recover too late, after their problem notifications have been sent.
+		for (auto& child : children) {
+			if (child->GetProblem() && child->GetEnableActiveChecks() && !child->IsLikelyToBeCheckedSoon()) {
+				ObjectLock oLock (child);
+				child->SetNextCheck(now + 10);
+			}
+		}
+	}
+
 	if (!reachable)
 		SetLastStateUnreachable(Utility::GetTime());
 

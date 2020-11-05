@@ -7,9 +7,18 @@
 #include "base/string.hpp"
 #include "base/array.hpp"
 #include "base/threadpool.hpp"
+#include <array>
+#include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/thread/tss.hpp>
+#include <cstddef>
+#include <set>
 #include <typeinfo>
 #include <vector>
+
+#ifndef _WIN32
+#include <unistd.h>
+#endif /* _WIN32 */
 
 namespace icinga
 {
@@ -80,6 +89,14 @@ public:
 #ifndef _WIN32
 	static void SetNonBlocking(int fd, bool nb = true);
 	static void SetCloExec(int fd, bool cloexec = true);
+
+	template<size_t exceptAmount>
+	static inline
+	void CloseAllFDs(const std::array<int, exceptAmount>& except);
+
+	template<size_t exceptAmount, class OnClose>
+	static inline
+	void CloseAllFDs(const std::array<int, exceptAmount>& except, OnClose onClose);
 #endif /* _WIN32 */
 
 	static void SetNonBlockingSocket(SOCKET s, bool nb = true);
@@ -156,6 +173,72 @@ private:
 	static boost::thread_specific_ptr<String> m_ThreadName;
 	static boost::thread_specific_ptr<unsigned int> m_RandSeed;
 };
+
+#ifndef _WIN32
+template<size_t exceptAmount>
+inline void Utility::CloseAllFDs(const std::array<int, exceptAmount>& except)
+{
+	CloseAllFDs(except, [](int) {});
+}
+
+template<size_t exceptAmount, class OnClose>
+inline void Utility::CloseAllFDs(const std::array<int, exceptAmount>& except, OnClose onClose)
+{
+#if defined(__linux__) || defined(__APPLE__)
+	namespace fs = boost::filesystem;
+
+	std::set<int> fds;
+
+	for (fs::directory_iterator current (fs::path(
+#ifdef __linux__
+		"/proc/self/fd"
+#endif /* __linux__ */
+#ifdef __APPLE__
+		"/dev/fd"
+#endif /* __APPLE__ */
+	)), end; current != end; ++current) {
+		auto entry (current->path().filename());
+		int fd;
+
+		try {
+			fd = boost::lexical_cast<int>(entry.c_str());
+		} catch (...) {
+			continue;
+		}
+
+		fds.emplace(fd);
+	}
+
+	for (auto fd : except) {
+		fds.erase(fd);
+	}
+
+	for (auto fd : fds) {
+		if (close(fd) >= 0) {
+			onClose(fd);
+		}
+	}
+#else /* __linux__ || __APPLE__ */
+	rlimit rl;
+
+	if (getrlimit(RLIMIT_NOFILE, &rl) >= 0) {
+		rlim_t maxfds = rl.rlim_max;
+
+		if (maxfds == RLIM_INFINITY) {
+			maxfds = 65536;
+		}
+
+		std::set<int> fds (except.begin(), except.end());
+
+		for (int fd = 0; fd < maxfds; ++fd) {
+			if (fds.find(fd) == fds.end() && close(fd) >= 0) {
+				onClose(fd);
+			}
+		}
+	}
+#endif /* __linux__ || __APPLE__ */
+}
+#endif /* _WIN32 */
 
 }
 

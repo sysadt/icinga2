@@ -906,24 +906,14 @@ int main(int argc, char **argv)
 #ifndef _WIN32
 	String keepFDs = Utility::GetFromEnvironment("ICINGA2_KEEP_FDS");
 	if (keepFDs.IsEmpty()) {
-		rlimit rl;
-		if (getrlimit(RLIMIT_NOFILE, &rl) >= 0) {
-			rlim_t maxfds = rl.rlim_max;
-
-			if (maxfds == RLIM_INFINITY)
-				maxfds = 65536;
-
-			for (rlim_t i = 3; i < maxfds; i++) {
-				int rc = close(i);
-
+		Utility::CloseAllFDs<3>(
+			{0, 1, 2}
 #ifdef I2_DEBUG
-				if (rc >= 0)
-					std::cerr << "Closed FD " << i << " which we inherited from our parent process." << std::endl;
-#else /* I2_DEBUG */
-				(void)rc;
-#endif /* I2_DEBUG */
+			, [](int fd) {
+				std::cerr << "Closed FD " << fd << " which we inherited from our parent process." << std::endl;
 			}
-		}
+#endif /* I2_DEBUG */
+		);
 	}
 #endif /* _WIN32 */
 

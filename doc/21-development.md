@@ -1864,7 +1864,7 @@ Chocolatey installs these tools into the hidden directory `C:\ProgramData\chocol
 
 #### OpenSSL
 
-Icinga 2 requires the OpenSSL library. [Download](http://slproweb.com/products/Win32OpenSSL.html) the Win64 package
+Icinga 2 requires the OpenSSL library. [Download](https://slproweb.com/products/Win32OpenSSL.html) the Win64 package
 and install it into `c:\local\OpenSSL-Win64`.
 
 Once asked for `Copy OpenSSLs DLLs to` select `The Windows system directory`. That way CMake/Visual Studio
@@ -1902,7 +1902,7 @@ Run the installer and leave the default installation path in `C:\local\boost_1_7
 
 ##### Source & Compile
 
-In order to use the boost development header and library files you need to [download](http://www.boost.org/users/download/)
+In order to use the boost development header and library files you need to [download](https://www.boost.org/users/download/)
 Boost and then extract it to e.g. `C:\local\boost_1_71_0`.
 
 > **Note**
@@ -1981,7 +1981,7 @@ when asked.
 >
 > **Tip**
 >
-> Cheatsheet: http://www.brianlheim.com/2018/04/09/cmake-cheat-sheet.html
+> Cheatsheet: https://www.brianlheim.com/2018/04/09/cmake-cheat-sheet.html
 
 Once setup is completed, open a command prompt and navigate to
 
@@ -2324,7 +2324,7 @@ yum -y install rpmdevtools
 SLES:
 
 ```
-zypper addrepo http://download.opensuse.org/repositories/devel:tools/SLE_12_SP4/devel:tools.repo
+zypper addrepo https://download.opensuse.org/repositories/devel:tools/SLE_12_SP4/devel:tools.repo
 zypper refresh
 zypper install rpmdevtools spectool
 ```
@@ -2332,7 +2332,7 @@ zypper install rpmdevtools spectool
 OpenSuSE:
 
 ```
-zypper addrepo http://download.opensuse.org/repositories/devel:tools/openSUSE_Leap_15.0/devel:tools.repo
+zypper addrepo https://download.opensuse.org/repositories/devel:tools/openSUSE_Leap_15.0/devel:tools.repo
 zypper refresh
 zypper install rpmdevtools spectool
 ```

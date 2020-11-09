@@ -4,7 +4,7 @@ local pull = {
 
 local cacheStep = pull + {
   failure: "ignore",
-  image: "plugins/s3-cache"
+  image: "plugins/s3-cache:1.4"
 };
 
 local Build(name, steps, failure, cacheUrl, buildOpts = {}) =

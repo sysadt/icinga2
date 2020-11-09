@@ -1,66 +1,22 @@
-local pull = {
-  pull: "always"
+local Build(name, steps, failure, cacheUrl, buildOpts = {}) = {
+  kind: "pipeline",
+  name: name,
+  image_pull_secrets: [
+    "gitlab-docker-registry-credentials"
+  ],
+  failure: failure,
+  steps: [
+    buildOpts + {
+      name: step[0],
+      image: "registry.icinga.com/build-docker/" + step[1],
+      pull: "always",
+      failure: step[3],
+      commands: [
+        ".drone/" + step[2] + ".sh"
+      ]
+    } for step in steps
+  ]
 };
-
-local cacheStep = pull + {
-  failure: "ignore",
-  image: "plugins/s3-cache"
-};
-
-local Build(name, steps, failure, cacheUrl, buildOpts = {}) =
-  local cachePath = "icinga2/" + name;
-  local cacheEnv = {
-    PLUGIN_PULL: "true",
-    PLUGIN_ENDPOINT: cacheUrl,
-    PLUGIN_ACCESS_KEY: {
-      from_secret: "minio-access-key"
-    },
-    PLUGIN_SECRET_KEY: {
-      from_secret: "minio-secret-key"
-    },
-    PLUGIN_ROOT: "cache",
-    PLUGIN_PATH: cachePath
-  };
-  {
-    kind: "pipeline",
-    name: name,
-    image_pull_secrets: [
-      "gitlab-docker-registry-credentials"
-    ],
-    failure: failure,
-    steps: [
-      cacheStep + {
-        name: "restore cache",
-        environment: cacheEnv + {
-          PLUGIN_RESTORE: "true"
-        }
-      }
-    ] + [
-      pull + buildOpts + {
-        name: step[0],
-        image: "registry.icinga.com/build-docker/" + step[1],
-        failure: step[3],
-        commands: [
-          ".drone/" + step[2] + ".sh"
-        ]
-      } for step in steps
-    ] + [
-      cacheStep + {
-        name: "save cache",
-        environment: cacheEnv + {
-          PLUGIN_REBUILD: "true",
-          PLUGIN_MOUNT: "ccache"
-        }
-      },
-      cacheStep + {
-        name: "cleanup cache",
-        environment: cacheEnv + {
-          PLUGIN_FLUSH: "true",
-          PLUGIN_FLUSH_PATH: cachePath
-        }
-      }
-    ]
-  };
 
 local K8s(name, steps, failure = "") =
   Build(name, steps, failure, "http://drone-minio:9000", {

@@ -127,7 +127,7 @@ local RasPi(codename) =
 
 [
   Deb("debian", "buster"),
-  Deb("debian", "stretch"),
+  /* Deb("debian", "stretch"),
   Deb("ubuntu", "groovy", false),
   Deb("ubuntu", "focal", false),
   Deb("ubuntu", "bionic"),
@@ -145,5 +145,5 @@ local RasPi(codename) =
   RPM("sles", "12.4"),
   RPM("opensuse", "15.1"),
   RPM("opensuse", "15.0"),
-  RasPi("buster"),
+  RasPi("buster"), */
 ]
